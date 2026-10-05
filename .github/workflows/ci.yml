@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install server deps
+        working-directory: server
+        run: npm ci
+
+      - name: Install client deps
+        working-directory: client
+        run: npm ci --legacy-peer-deps
+
+      - name: Typecheck all
+        run: npm run typecheck
+
+      - name: Server tests (includes RBAC audit via vitest)
+        run: npm test
+        env:
+          RUN_MONEY_TESTS: "0"
+
+      - name: Client production build
+        working-directory: client
+        run: CI=false npm run build

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FAF7F2" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="MANGAUD Banking Console — accounts, cards, transfers, loans, fixed deposits and statements."
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MANGAUD" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <title>MANGAUD &middot; Banking Console</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      IBM Plex Sans + JetBrains Mono, and only those.
+
+      This used to request Fraunces and Outfit as well. Neither is used: the
+      design system's `display` family resolves to IBM Plex Sans (see
+      tailwind.config.js), so those two families were a render-blocking request
+      to Google Fonts for typefaces nothing on the page draws with -- paid for in
+      first paint, invisible in review. They were left over from the pre-Swiss
+      direction.
+
+      Loaded here as a <link> rather than an `@import` in index.css: a CSS
+      @import is discovered only after the stylesheet that contains it has
+      downloaded and parsed, which puts it a full round trip later in the
+      critical path.
+    -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+      Apply the saved theme before first paint.
+
+      This has to run synchronously here rather than in a React effect: an
+      effect runs after the first paint, so a dark-mode user would get a flash
+      of the light theme on every reload. It reads the same storage key that
+      `useTheme` writes, so the two cannot disagree.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('mangaud.theme');
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          if (theme === 'dark') document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = theme;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', theme === 'dark' ? '#0D121B' : '#FAF7F2');
+        } catch (e) {
+          /* Storage blocked: the light theme already in the HTML is the fallback. */
+        }
+      })();
+    </script>
+    <!--
+      Boot splash.
+
+      Why this exists, and why it is styled inline rather than in index.css:
+
+      `#root` is empty in the served HTML, so between first paint and React's
+      first render the page shows *nothing at all*. In development that gap is
+      however long webpack takes to compile -- measured at ~10s warm on this
+      machine, and much longer on a cold checkout, because the repository sits
+      under OneDrive and webpack watches every file in it. A blank screen for
+      that long does not read as "loading"; it reads as a broken app, which is
+      exactly the report this replaces.
+
+      So the first thing on screen is a real, deliberate state: branded, themed,
+      and visible before any JavaScript runs. Its colours are inline CSS custom
+      properties re-pointed by the `.dark` class the script above sets, so it
+      matches the theme rather than flashing the wrong one.
+
+      `index.tsx` removes it once React has mounted, and also on a failsafe
+      timer, so a bundle that throws still cannot leave it covering the app.
+    -->
+    <style>
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        gap: 1rem;
+        background: #faf7f2;
+        --boot-ink: #0e1726;
+        --boot-muted: #64748b;
+        --boot-line: #e2e8f0;
+        --boot-accent: #b45309;
+      }
+      .dark #boot {
+        background: #090d16;
+        --boot-ink: #edf2f9;
+        --boot-muted: #96a3b7;
+        --boot-line: #273142;
+        --boot-accent: #f5b841;
+      }
+      #boot .boot-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        text-align: center;
+        padding: 0 1.5rem;
+      }
+      #boot .boot-mark {
+        font: 600 0.8125rem/1 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--boot-ink);
+      }
+      #boot .boot-rule {
+        width: 148px;
+        height: 2px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: var(--boot-line);
+      }
+      /* A sweep rather than a spinner: it reads as progress, and it does not
+         rotate, so it stays still under prefers-reduced-motion. */
+      #boot .boot-sweep {
+        width: 60%;
+        height: 100%;
+        border-radius: 999px;
+        background: var(--boot-accent);
+        animation: boot-sweep 1.15s var(--ease, ease-in-out) infinite;
+      }
+      @keyframes boot-sweep {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(166%); }
+      }
+      #boot .boot-note {
+        font: 400 0.75rem/1.5 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        color: var(--boot-muted);
+        max-width: 30ch;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot .boot-sweep { animation: none; width: 100%; opacity: 0.5; }
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="boot" role="status" aria-live="polite">
+      <div class="boot-inner">
+        <p class="boot-mark">Mangaud</p>
+        <div class="boot-rule"><div class="boot-sweep"></div></div>
+        <p class="boot-note">Preparing your banking console</p>
+      </div>
+    </div>
+    <div id="root"></div>
+  </body>
+</html>

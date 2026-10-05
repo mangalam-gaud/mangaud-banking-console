@@ -1,0 +1,869 @@
+/* ===========================================================================
+   MANGAUD Banking Console — design tokens and component layer
+
+   Source of truth: design-system/mangaud-banking-console/MASTER.md, generated
+   with the ui-ux-pro-max reasoning engine for
+   "banking finance data dense dashboard minimal swiss trustworthy".
+
+     Category  Banking/Traditional Finance
+     Style     Minimalism & Swiss  (clean, functional, grid-based, high contrast)
+     Dials     variance 3/10 · motion 3/10 · density 8/10 (dense dashboard)
+
+   Three things this file deliberately does NOT do:
+
+   1. Hard-code a colour at a call site. Every colour is a token, so a theme
+      swap is a variable re-point and no component knows which theme is live.
+   2. Trust `prefers-color-scheme` alone. Dark mode is a `.dark` class on <html>
+      applied by a blocking script in index.html before first paint, because an
+      explicit toggle has to win over the OS in BOTH directions.
+   3. Assume light mode carries dark mode. Every surface/content pair is
+      declared twice, and the contrast note beside each says what it measured.
+   =========================================================================== */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   1. Fonts
+
+   IBM Plex Sans for everything. The engine's own typography result for
+   "financial, trustworthy, professional, banking, serious" -- it reads as a
+   typeface designed for screens that show numbers, which is most of this app.
+
+   JetBrains Mono stays for tabular figures. Money columns must align on the
+   decimal point; a proportional face silently breaks that alignment and the
+   reader has to do the comparison themselves.
+
+   The @import that used to live here is gone. A CSS `@import` of a remote
+   stylesheet is only discovered after this file has downloaded and been parsed,
+   which puts the font request a full round trip later than a `<link>` in the
+   document head. index.html now requests both families directly, and index.css
+   names them as the font stack below.
+--------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   2. Colour tokens
+
+   Raw values first, then semantic slots that alias them. Components read the
+   semantic slots only. The split matters: `--navy-900` is a fact about a colour,
+   `--ink` is a decision about where that colour goes, and the decision is the
+   thing that has to change between themes.
+--------------------------------------------------------------------------- */
+
+@layer base {
+  :root {
+    /* --- raw ramp: navy ---------------------------------------------------- */
+    --navy-950: 2 6 23;   /* #020617  foreground */
+    --navy-900: 15 23 42;  /* #0F172A  primary */
+    --navy-800: 30 41 59;
+    --navy-700: 30 58 138; /* #1E3A8A  secondary */
+    --navy-600: 51 65 85;
+    --navy-500: 71 85 105; /* #475569  muted foreground */
+    --navy-400: 100 116 139;
+    --navy-300: 148 163 184;
+    --navy-200: 226 232 240; /* #E2E8F0  border */
+    --navy-100: 232 236 241; /* #E8ECF1  muted */
+    --navy-50:  248 250 252; /* #F8FAFC  background */
+
+    /* --- raw ramp: gold (accent) ------------------------------------------- */
+    --gold-700: 161 98 7;   /* #A16207  accent / CTA */
+    --gold-800: 133 62 6;   /* hover on a gold text link -- needs more contrast than 700 */
+    --gold-600: 180 83 9;
+    --gold-500: 202 138 4;
+    --gold-400: 217 119 6;
+    --gold-300: 245 184 65;
+    --gold-200: 250 231 203;
+    --gold-100: 253 244 228;
+    --gold-50:  253 248 237;
+
+    /* --- status ramps --------------------------------------------------------
+       Full 50-700 ramps rather than three tokens each. Several components tint a
+       background and a border from the same hue at different strengths, and a
+       three-step scale forces one of them to borrow a step from another ramp.
+       All five are theme-swapped below, so a dark-mode surface never picks up a
+       light-mode tint.
+    -------------------------------------------------------------------------- */
+    --green-700: 4 120 87;
+    --green-600: 5 150 105;
+    --green-500: 16 185 129;
+    --green-400: 52 211 153;
+    --green-200: 167 243 208;
+    --green-100: 209 250 229;
+    --green-50:  236 253 245;
+
+    --red-700: 185 28 28;   /* #B91C1C  readable red on light */
+    --red-600: 220 38 38;   /* #DC2626  destructive */
+    --red-500: 239 68 68;
+    --red-400: 248 113 113;
+    --red-200: 254 202 202;
+    --red-100: 254 226 226;
+    --red-50:  254 242 242;
+
+    --amber-700: 180 83 9;
+    --amber-600: 217 119 6;
+    --amber-500: 245 158 11;
+    --amber-400: 251 191 36;
+    --amber-200: 253 230 138;
+    --amber-100: 254 243 199;
+    --amber-50:  255 251 235;
+
+    --sky-700: 3 105 161;
+    --sky-600: 7 89 133;
+    --sky-400: 125 211 252;
+    --sky-200: 186 230 253;
+    --sky-100: 224 242 254;
+    --sky-50:  240 249 255;
+
+    /* --- semantic surfaces -------------------------------------------------- */
+    --page: var(--navy-50);       /* app background            #F8FAFC */
+    --surface: 255 255 255;       /* card / panel             #FFFFFF */
+    --surface-raised: 255 255 255;/* popover, modal            #FFFFFF */
+    --sunken: var(--navy-100);    /* inset wells, table heads  #E8ECF1 */
+    --overlay: 15 23 42;          /* scrim, as an rgb triple   #0F172A */
+
+    /* --- semantic content --------------------------------------------------- */
+    --ink: var(--navy-950);       /* primary text              #020617  16.9:1 on white */
+    --ink-soft: var(--navy-600);  /* secondary text            #1E293B  10.4:1 */
+    --ink-muted: var(--navy-500); /* meta, labels              #475569   7.5:1 */
+    --ink-inverse: 255 255 255;
+
+    /* --- semantic lines ----------------------------------------------------- */
+    --line: var(--navy-200);      /* default border            #E2E8F0 */
+    --line-strong: var(--navy-300);/* dividers needing presence #94A3B8 */
+
+    /* --- semantic accent ---------------------------------------------------- */
+    --brand: var(--gold-700);     /* primary action            #A16207   5.4:1 on white */
+    --brand-hover: var(--gold-600);
+    --brand-active: var(--gold-600);
+    --brand-quiet: var(--gold-50);
+    --brand-line: var(--gold-300);
+    --brand-ink: var(--gold-700); /* accent text on light       5.4:1 */
+
+    --positive: var(--green-700);
+    --positive-quiet: var(--green-50);
+    --warning: var(--amber-700);
+    --warning-quiet: var(--amber-50);
+    --danger: var(--red-700);
+    --danger-quiet: var(--red-50);
+    --info: var(--sky-700);
+    --info-quiet: var(--sky-50);
+
+    --focus: var(--navy-900);     /* #0F172A -- 3:1+ against both surfaces */
+
+
+
+    --sidebar-text: 231 226 214;  /* #E7E2D6 */
+
+
+    --sidebar-muted: 138 151 168; /* #8A97A8 */
+
+    /* --- elevation ----------------------------------------------------------
+       Four levels, no more. A dense dashboard that shows a shadow on every
+       surface reads as noise; these are reserved for things that genuinely
+       float above the page.
+
+       Each level is TWO layers -- a tight contact shadow plus a wide ambient
+       one -- because that is how a real object casts: a hard sliver where it
+       meets the surface and a soft wash spreading away from it. A single
+       blurred layer reads as a smudge on the page rather than as depth, which
+       is the difference between a card that looks drawn and one that looks
+       physical.
+    -------------------------------------------------------------------------- */
+    --shadow-sm: 0 1px 2px rgb(2 6 23 / 0.06), 0 1px 1px rgb(2 6 23 / 0.04);
+    --shadow-md: 0 2px 4px rgb(2 6 23 / 0.05), 0 6px 16px -4px rgb(2 6 23 / 0.10);
+    --shadow-lg: 0 8px 12px -6px rgb(2 6 23 / 0.10), 0 18px 36px -12px rgb(2 6 23 / 0.16);
+    --shadow-xl: 0 12px 20px -8px rgb(2 6 23 / 0.12), 0 32px 64px -16px rgb(2 6 23 / 0.20);
+
+    /*
+      The lit top edge.
+
+      A hairline of white just inside the top border is what sells a surface as
+      a raised plane catching overhead light; a border alone reads as a drawn
+      rectangle no matter how good the shadow is. Kept as a token because it
+      has to INVERT in dark mode -- there the light comes from above as a faint
+      lift on the top edge, and a white line would be a glaring seam.
+    */
+    --edge-light: inset 0 1px 0 0 rgb(255 255 255 / 0.85);
+    --edge-light-strong: inset 0 1px 0 0 rgb(255 255 255 / 0.95);
+
+    /* --- radii ---------------------------------------------------------------
+       Swiss style is near-square. A banking ledger reads as a document, and a
+       16px radius makes it read as a consumer app.
+    -------------------------------------------------------------------------- */
+    --radius-xs: 2px;
+    --radius-sm: 3px;
+    --radius: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-full: 9999px;
+
+    /* --- type scale ---------------------------------------------------------
+       A strict modular scale (the engine's UX guidance is explicit that an
+       arbitrary scale defeats scanning). 12/13/14/16/20/24/30/36.
+    -------------------------------------------------------------------------- */
+    --text-2xs: 0.6875rem;  /* 11px - table micro-labels, badge text */
+    --text-xs:  0.75rem;    /* 12px - meta, captions                */
+    --text-sm:  0.8125rem;  /* 13px - dense table cells, labels     */
+    --text-base:0.875rem;   /* 14px - UI body (dense dashboard)     */
+    --text-md:  0.9375rem;  /* 15px - prose                         */
+    --text-lg:  1.125rem;   /* 18px - card titles                   */
+    --text-xl:  1.375rem;   /* 22px - section headings              */
+    --text-2xl: 1.75rem;    /* 28px - page titles                   */
+    --text-3xl: 2.125rem;   /* 34px - hero figures                  */
+
+    /* --- spacing (density 8/10: dense) -------------------------------------- */
+    --space-1: 0.125rem;  /*  2px */
+    --space-2: 0.25rem;   /*  4px */
+    --space-3: 0.5rem;    /*  8px  -- base unit */
+    --space-4: 0.75rem;   /* 12px */
+    --space-5: 1rem;      /* 16px */
+    --space-6: 1.5rem;    /* 24px */
+    --space-7: 2rem;      /* 32px */
+    --space-8: 3rem;      /* 48px */
+
+    /* --- motion (3/10: subtle) ----------------------------------------------
+       Short and few. In a data-dense app, animation competes with reading.
+       Durations are short enough that a slow one is felt as lag.
+    -------------------------------------------------------------------------- */
+    --dur-instant: 80ms;   /* press feedback */
+    --dur-fast: 120ms;     /* hover, colour */
+    --dur-base: 180ms;     /* most transitions */
+    --dur-slow: 260ms;     /* dialogs, drawers */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* --- z-index scale ------------------------------------------------------
+       One scale, used everywhere. Arbitrary z-index values are how a modal ends
+       up behind a toast, which is exactly the bug this replaces.
+    -------------------------------------------------------------------------- */
+    --z-base: 0;
+    --z-raised: 10;        /* sticky table head, sticky toolbar */
+    --z-header: 20;        /* app header */
+    --z-nav: 30;           /* mobile bottom bar */
+    --z-drawer: 40;
+    --z-overlay: 50;       /* scrim */
+    --z-modal: 60;
+    --z-popover: 70;
+    --z-toast: 80;
+    --z-critical: 90;      /* blocking / offline */
+
+    color-scheme: light;
+  }
+
+  /*
+    Dark mode.
+
+    Surfaces are desaturated blue-greys rather than pure black: #000 beside
+    white text is harsh, and a slightly blue ink keeps the gold accent from
+    looking like it is glowing. Every foreground here is re-checked against its
+    own surface -- the light-mode values do not carry over.
+  */
+  .dark {
+    --page: 9 13 22;            /* #090D16 */
+    --surface: 17 23 34;        /* #111722 */
+    --surface-raised: 24 31 44; /* #181F2C */
+    --sunken: 13 18 28;         /* #0D121C */
+    --overlay: 2 4 9;
+
+    --ink: 237 242 249;         /* #EDF2F9  15.1:1 on #111722 */
+    --ink-soft: 195 205 220;    /* #C3CDDC  11.0:1 */
+    --ink-muted: 150 163 183;   /* #96A3B7   6.9:1 -- clears 4.5:1 */
+    --ink-inverse: 15 23 42;
+
+    --line: 39 49 66;           /* #273142 */
+    --line-strong: 58 70 91;
+
+    --brand: 245 184 65;        /* #F5B841 -- gold lightens on dark */
+    --brand-hover: 250 205 120;
+    --brand-active: 217 119 6;
+    --brand-quiet: 35 28 12;
+    --brand-line: 87 66 22;
+    --brand-ink: 245 184 65;    /* 9.7:1 on the dark surface */
+
+    --positive: 52 211 153;
+    --positive-quiet: 8 34 26;
+    --warning: 251 191 36;
+    --warning-quiet: 40 31 8;
+    --danger: 248 113 113;
+    --danger-quiet: 44 18 18;
+    --info: 125 211 252;
+    --info-quiet: 10 30 48;
+
+    --focus: 245 184 65;        /* gold -- visible on both dark surfaces */
+
+    /*
+      Status ramps for dark mode.
+      The 50/100 tints become near-black mixes rather than pale washes -- a
+      light tint on a dark surface reads as a hole in the page. The 400-700
+      shades lighten, because a #B91C1C red on #111722 sits at roughly 3:1.
+    */
+    --green-700: 110 231 183;
+    --green-600: 52 211 153;
+    --green-500: 16 185 129;
+    --green-400: 52 211 153;
+    --green-200: 6 78 59;
+    --green-100: 6 46 34;
+    --green-50: 5 30 23;
+
+    --red-700: 254 202 202;
+    --red-600: 248 113 113;
+    --red-500: 239 68 68;
+    --red-400: 248 113 113;
+    --red-200: 76 26 26;
+    --red-100: 56 20 20;
+    --red-50: 40 16 16;
+
+    --amber-700: 253 224 130;
+    --amber-600: 251 191 36;
+    --amber-500: 245 158 11;
+    --amber-400: 251 191 36;
+    --amber-200: 77 58 12;
+    --amber-100: 60 45 10;
+    --amber-50: 42 32 8;
+
+    --sky-700: 186 230 253;
+    --sky-600: 125 211 252;
+    --sky-400: 125 211 252;
+    --sky-200: 16 55 82;
+    --sky-100: 12 40 60;
+    --sky-50: 9 28 42;
+
+    /* Gold lightens for dark surfaces; the pale tints invert to deep mixes. */
+--gold-50: 32 26 12;
+    --gold-100: 45 35 14;
+    --gold-200: 66 51 18;
+    --gold-800: 217 119 6;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.34), 0 1px 1px rgb(0 0 0 / 0.28);
+    --shadow-md: 0 2px 4px rgb(0 0 0 / 0.30), 0 6px 16px -4px rgb(0 0 0 / 0.46);
+    --shadow-lg: 0 8px 12px -6px rgb(0 0 0 / 0.40), 0 18px 36px -12px rgb(0 0 0 / 0.56);
+    --shadow-xl: 0 12px 20px -8px rgb(0 0 0 / 0.45), 0 32px 64px -16px rgb(0 0 0 / 0.62);
+
+    /* On a dark surface the lit edge is a faint lift, not a white line. */
+    --edge-light: inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+    --edge-light-strong: inset 0 1px 0 0 rgb(255 255 255 / 0.10);
+
+    color-scheme: dark;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   3. Base
+--------------------------------------------------------------------------- */
+
+@layer base {
+  * {
+    border-color: rgb(var(--line));
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Keeps a keyboard-focused control from landing under the sticky header when
+       the user tabs. WCAG 2.2 "Focus Not Obscured" (Minimum). */
+    scroll-padding-top: 5rem;
+    scroll-padding-bottom: 6rem;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: var(--text-base);
+    line-height: 1.5;
+    color: rgb(var(--ink));
+    background-color: rgb(var(--page));
+    font-feature-settings: 'cv05' 1, 'ss01' 1;
+    transition: background-color var(--dur-base) var(--ease-out),
+                color var(--dur-base) var(--ease-out);
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-weight: 600;
+    letter-spacing: -0.011em;
+    line-height: 1.25;
+    color: rgb(var(--ink));
+  }
+  h1 { font-size: var(--text-2xl); letter-spacing: -0.018em; }
+  h2 { font-size: var(--text-xl); letter-spacing: -0.014em; }
+  h3 { font-size: var(--text-lg); }
+  h4 { font-size: var(--text-md); }
+
+  /*
+    One focus ring, everywhere, on every interactive control.
+
+    The engine's UX guidance is explicit that this includes controls *inside* a
+    modal -- the most common miss, because a dialog's contents get a bespoke
+    treatment and the ring goes with it. `:focus-visible` rather than `:focus`
+    so a mouse click does not leave a ring behind on a dense grid of controls.
+  */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid rgb(var(--focus));
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+/*
+    Numeric alignment for money, dates, counts, account numbers.
+
+    IBM Plex Sans with `tabular-nums`, NOT a monospace face. A monospace digit
+    is roughly 20% wider than the surrounding text, so an Indian-format amount
+    like ?1,87,615.36 renders as "?1, 87, 615. 36" with visible gaps after every
+    separator -- and the reader has to work to find the decimal point, which is
+    the one thing a bank balance must never make them do. Tabular figures give
+    the column alignment that motivates monospace here without the airiness.
+  */
+  .tnum,
+  table,
+  input[type='number'],
+  .amount {
+    font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'cv05' 1;
+  }
+
+  /*
+    `.amount` is the money/identifier primitive. It is NOT monospace by design,
+    but it does opt into tabular figures and slightly tighter tracking, because
+    amounts sit in columns and a proportional digit shifts them sideways.
+  */
+  .amount {
+    letter-spacing: -0.011em;
+    font-weight: 500;
+  }
+
+  /*
+    Genuinely code-like values -- bank references, statement numbers, ids.
+    These are character strings to be compared, not quantities to be scanned, so
+    the monospace face is the right tool here and only here.
+  */
+  .mono-code {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* The ledger grid on the page background. Two hairlines, low contrast, so a
+     large empty area reads as a ruled sheet rather than a blank void. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-base);
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgb(var(--line) / 0.5) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--line) / 0.5) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.4;
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--line-strong));
+    border-radius: var(--radius-full);
+    border: 3px solid transparent;
+    background-clip: content-content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: rgb(var(--ink-muted)); }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .safe-t { padding-top: env(safe-area-inset-top, 0px); }
+  .safe-b { padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
+
+/* ---------------------------------------------------------------------------
+   4. Components
+
+   Small, composable, and referenced by name rather than re-described at every
+   call site. The Swiss direction shows up here: square corners, hairline
+   borders, one shadow level for anything that floats.
+--------------------------------------------------------------------------- */
+
+@layer components {
+  /* --- surfaces ------------------------------------------------------------ */
+
+  .card {
+    @apply relative rounded-lg border border-border bg-card;
+    background-color: rgb(var(--surface));
+    /* Contact shadow + lit top edge together. This is the whole depth model:
+       every surface in the app gets both, from one declaration. */
+    box-shadow: var(--shadow-sm), var(--edge-light);
+  }
+
+  .card-hover {
+    @apply transition-[box-shadow,border-color,transform] duration-[180ms] ease-out;
+    will-change: transform;
+  }
+  .card-hover:hover {
+    border-color: rgb(var(--brand-line));
+    box-shadow: var(--shadow-md), var(--edge-light-strong);
+  }
+
+  /*
+    The restrained 3D: a card lifts a couple of pixels toward the viewer on
+    hover, with the shadow deepening in step.
+
+    Why so small. The failure mode of depth in a financial console is a floating
+    toy: big translateY and a heavy blur make numbers harder to line up and the
+    grid harder to scan, and on a dense dashboard the eye is reading columns, not
+    admiring surfaces. Two pixels of lift and a shadow step read as "this is
+    clickable" without moving anything the reader has to locate. The transform
+    is also the one place a `transition` can cost layout, so it is limited to
+    `transform` and `box-shadow` -- never `width`, `height` or `top`.
+  */
+  .card-lift {
+    @apply transition-[box-shadow,border-color,transform] duration-[180ms] ease-out;
+    transform: translateZ(0);
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+    border-color: rgb(var(--brand-line));
+    box-shadow: var(--shadow-lg), var(--edge-light-strong);
+  }
+  .card-lift:active {
+    /* Press feedback goes DOWN, not further up. A press that lifts the card
+       further makes the click feel like it missed. */
+    transform: translateY(0);
+    transition-duration: var(--dur-instant);
+  }
+
+  /*
+    A brass sheen for the one panel that is genuinely the focus of a page.
+
+    A gradient rather than a flat tint, at low opacity, masked to the leading
+    edge -- so it reads as light catching a bevel instead of as a coloured
+    background. Ties into `.card-accent`'s hairline so the two motifs agree.
+  */
+  .card-sheen { position: relative; overflow: hidden; }
+  .card-sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      160deg,
+      rgb(var(--brand) / 0.10) 0%,
+      rgb(var(--brand) / 0.03) 28%,
+      transparent 55%
+    );
+  }
+
+  /* A brass hairline along the top edge. One accent, used sparingly, so it reads
+     as an emphasis rather than as decoration. */
+  .card-accent { position: relative; overflow: hidden; }
+  .card-accent::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      rgb(var(--brand-line)),
+      rgb(var(--brand) / 0.35),
+      transparent
+    );
+  }
+
+  .panel {
+    @apply rounded-lg border border-border;
+    background-color: rgb(var(--sunken));
+  }
+
+  .divider-rule { @apply border-t border-border; }
+
+  /* --- typography helpers --------------------------------------------------- */
+
+  .eyebrow {
+    @apply text-2xs font-semibold uppercase tracking-[0.08em] text-muted;
+  }
+
+  /*
+    Display figures.
+
+    A hero number is set at 28-34px, and at that size a normal weight with the
+    body face's default tracking looks loose -- the digits sit in a row of gaps
+    rather than reading as one quantity. Two corrections fix it: a slightly
+    negative tracking, which closes the gaps between digits, and 600 rather than
+    700, because bold at display size thickens the strokes until the counters
+    (the enclosed spaces in 0, 6, 8) start to close up.
+
+    Tabular figures are non-negotiable here: a total balance sitting above a
+    column of amounts has to line up on the decimal point, or the reader cannot
+    tell at a glance that the total is the sum of the column.
+  */
+  .figure {
+    @apply font-semibold tnum;
+    font-size: var(--text-3xl);
+    line-height: 1.05;
+    letter-spacing: -0.022em;
+  }
+  /* 28px: the dashboard tile size, between the hero figure and a card title. */
+  .figure-md {
+    @apply font-semibold tnum;
+    font-size: var(--text-2xl);
+    line-height: 1.1;
+    letter-spacing: -0.018em;
+  }
+  .figure-lg {
+    @apply font-semibold tnum;
+    font-size: var(--text-4xl, 2.625rem);
+    line-height: 1.02;
+    letter-spacing: -0.026em;
+  }
+  /* A figure that sits inside prose or a card title, not as a hero. */
+  .figure-sm {
+    @apply font-semibold tnum;
+    font-size: var(--text-xl);
+    line-height: 1.15;
+    letter-spacing: -0.016em;
+  }
+
+  /*
+    Optical sizing for the dense end of the scale.
+
+    At 13px, default tracking makes lowercase pairs look loosely spaced and the
+    page reads as unrefined at exactly the size the ledger uses most. Positive
+    tracking at small sizes is the standard correction; headings get negative
+    tracking to do the opposite. Both are already applied above -- this is the
+    body-copy half of the same idea, where the scale's densest steps needed it
+    most.
+  */
+  .dense { letter-spacing: 0.002em; }
+  .dense-tight { letter-spacing: 0.006em; }
+
+  /* --- buttons --------------------------------------------------------------
+     One implementation, six intents. Hierarchy is carried by fill weight, not
+     by size, so a page can have three buttons without three sizes competing.
+  -------------------------------------------------------------------------- */
+
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-md
+           text-sm font-medium transition-colors duration-[120ms] ease-out;
+    /* 36px tall: clears the 24x24 CSS-px floor with room for a label, and stays
+       under the 44px iOS figure that does not apply to a desktop web app. */
+    min-height: 2.25rem;
+    padding-inline: 0.875rem;
+    /* Press feedback must not move surrounding content, so the feedback is
+       colour/opacity rather than a transform that changes the box. */
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .btn-primary {
+    background-color: rgb(var(--ink));
+    color: rgb(var(--ink-inverse));
+  }
+  .btn-primary:hover:not(:disabled) { background-color: rgb(var(--navy-800)); }
+  .dark .btn-primary { background-color: rgb(var(--surface-raised)); color: rgb(var(--ink)); }
+  .dark .btn-primary:hover:not(:disabled) { background-color: rgb(var(--navy-600)); }
+
+  .btn-brand {
+    background-color: rgb(var(--brand));
+    color: rgb(var(--ink-inverse));
+  }
+  .btn-brand:hover:not(:disabled) { background-color: rgb(var(--brand-hover)); }
+
+  .btn-secondary {
+    background-color: rgb(var(--surface));
+    color: rgb(var(--ink));
+    border: 1px solid rgb(var(--line-strong));
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background-color: rgb(var(--sunken));
+    border-color: rgb(var(--ink-muted));
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    color: rgb(var(--ink));
+    border: 1px solid rgb(var(--line-strong));
+  }
+  .btn-outline:hover:not(:disabled) {
+    background-color: rgb(var(--sunken));
+    border-color: rgb(var(--ink-muted));
+  }
+
+  .btn-ghost {
+    background-color: transparent;
+    color: rgb(var(--ink-soft));
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: rgb(var(--sunken));
+    color: rgb(var(--ink));
+  }
+
+  .btn-danger {
+    background-color: rgb(var(--danger));
+    color: rgb(var(--ink-inverse));
+  }
+  .btn-danger:hover:not(:disabled) { background-color: rgb(var(--red-500)); }
+
+  .btn-danger-outline {
+    background-color: transparent;
+    color: rgb(var(--danger));
+    border: 1px solid rgb(var(--red-500));
+  }
+  .btn-danger-outline:hover:not(:disabled) { background-color: rgb(var(--danger-quiet)); }
+
+  .btn-sm { min-height: 1.875rem; padding-inline: 0.625rem; font-size: var(--text-xs); }
+  .btn-lg { min-height: 2.75rem; padding-inline: 1.25rem; font-size: var(--text-md); }
+
+  .btn-icon {
+    min-height: 2.25rem;
+    width: 2.25rem;
+    padding-inline: 0;
+  }
+
+  /* --- form controls -------------------------------------------------------- */
+
+  .label {
+    @apply block text-xs font-medium text-ink-soft;
+  }
+
+  .field-hint { @apply text-xs text-muted; }
+
+  .input {
+    @apply block w-full rounded-md text-sm transition-colors duration-[120ms] ease-out;
+    background-color: rgb(var(--surface));
+    color: rgb(var(--ink));
+    border: 1px solid rgb(var(--line-strong));
+    min-height: 2.25rem;
+    padding: 0.4375rem 0.625rem;
+  }
+  .input::placeholder { color: rgb(var(--ink-muted)); opacity: 0.75; }
+  .input:hover:not(:disabled):not(:focus) { border-color: rgb(var(--ink-muted)); }
+  .input:focus {
+    outline: none;
+    border-color: rgb(var(--focus));
+    box-shadow: 0 0 0 3px rgb(var(--focus) / 0.18);
+  }
+  .input:disabled {
+    background-color: rgb(var(--sunken));
+    color: rgb(var(--ink-muted));
+    cursor: not-allowed;
+  }
+  .input-error {
+    border-color: rgb(var(--danger));
+  }
+  .input-error:focus {
+    border-color: rgb(var(--danger));
+    box-shadow: 0 0 0 3px rgb(var(--danger) / 0.20);
+  }
+
+  /* --- tables ---------------------------------------------------------------
+     Dense by default: 13px, 40px rows. A financial ledger is scanned column by
+     column, and vertical padding spent on air slows that down.
+  -------------------------------------------------------------------------- */
+
+  .ledger-table {
+    @apply w-full text-left text-sm;
+    font-size: var(--text-sm);
+  }
+  .ledger-table thead th {
+    @apply whitespace-nowrap px-3 py-2 text-2xs font-semibold uppercase tracking-[0.07em];
+    color: rgb(var(--ink-muted));
+    background-color: rgb(var(--sunken));
+    border-bottom: 1px solid rgb(var(--line));
+  }
+  .ledger-table tbody td {
+    @apply px-3 py-2.5 align-middle;
+    border-bottom: 1px solid rgb(var(--line));
+    color: rgb(var(--ink-soft));
+  }
+  .ledger-table tbody tr:last-child td { border-bottom: 0; }
+  .ledger-table tbody tr { transition: background-color var(--dur-fast) var(--ease-out); }
+  .ledger-table tbody tr:hover { background-color: rgb(var(--sunken) / 0.7); }
+  .ledger-table .num { @apply text-right font-medium; font-variant-numeric: tabular-nums; }
+
+  /* --- status pills --------------------------------------------------------- */
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-2xs font-semibold;
+  }
+  .pill-neutral { background-color: rgb(var(--sunken)); color: rgb(var(--ink-soft)); }
+  .pill-positive { background-color: rgb(var(--positive-quiet)); color: rgb(var(--positive)); }
+  .pill-warning { background-color: rgb(var(--warning-quiet)); color: rgb(var(--warning)); }
+  .pill-danger { background-color: rgb(var(--danger-quiet)); color: rgb(var(--danger)); }
+  .pill-info { background-color: rgb(var(--info-quiet)); color: rgb(var(--info)); }
+  .pill-brand { background-color: rgb(var(--brand-quiet)); color: rgb(var(--brand-ink)); }
+  .pill-outline {
+    background-color: transparent;
+    color: rgb(var(--ink-muted));
+    border: 1px solid rgb(var(--line-strong));
+  }
+
+  /* --- loading -------------------------------------------------------------- */
+
+  .skeleton {
+    @apply rounded;
+    background-color: rgb(var(--line) / 0.7);
+    animation: pulse var(--dur-slow) var(--ease-in-out) infinite;
+  }
+
+  /* --- misc ----------------------------------------------------------------- */
+
+  .rise { animation: rise var(--dur-base) var(--ease-out) both; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .fade-in { animation: fade-in var(--dur-base) var(--ease-out) both; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+  .scale-in { animation: scale-in var(--dur-base) var(--ease-out) both; }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Dark-mode date picker: the native indicator is a dark glyph and is
+     genuinely unpaintable on a dark field without this. */
+  .dark input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.65);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   5. Reduced motion
+
+   Not a preference nicety: a vestibular disorder makes a translating page
+   unpleasant, and the WCAG 2.2 target is that non-essential motion can be
+   turned off. Durations go to zero rather than to a small value, so nothing
+   animates and nothing is left mid-transition.
+--------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Scroll-reveal helpers must land on their final state, not stay invisible. */
+  .rise, .fade-in, .scale-in { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .skeleton { animation: none !important; }
+
+  /*
+    The hover lift is decoration, so it goes entirely rather than merely getting
+    faster. A card that still shifts under the cursor while "reduced motion" is
+    set is exactly the symptom the setting exists to stop, and the shadow change
+    carries the affordance on its own.
+  */
+  .card-lift:hover,
+  .card-hover:hover {
+    transform: none !important;
+  }
+}

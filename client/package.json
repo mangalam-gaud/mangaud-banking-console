@@ -1,0 +1,63 @@
+{
+  "name": "banking-client",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "start:lan": "set HOST=0.0.0.0&& react-scripts start",
+    "preview": "node scripts/preview.mjs",
+    "preview:lan": "set PREVIEW_HOST=0.0.0.0&& node scripts/preview.mjs",
+    "check:pwa": "node scripts/pwa-check.mjs",
+    "build": "react-scripts build",
+    "typecheck": "tsc --noEmit && node scripts/check-tokens.mjs",
+    "check:tokens": "node scripts/check-tokens.mjs",
+    "make:icons": "node scripts/make-icons.mjs",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.3.2",
+    "@react-three/drei": "^9.108.0",
+    "@react-three/fiber": "^8.16.8",
+    "axios": "^1.6.2",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.0.6",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.49.2",
+    "react-hot-toast": "^2.4.1",
+    "react-router-dom": "^6.21.1",
+    "recharts": "^2.10.3",
+    "tailwind-merge": "^2.2.0",
+    "three": "^0.166.1",
+    "zod": "^3.22.4",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@types/three": "^0.166.0",
+    "ajv": "^8.17.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33",
+    "react-scripts": "^5.0.1",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
+  },
+  "proxy": "http://localhost:5000",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "banking-app",
+  "version": "1.0.0",
+  "description": "Mangaud Banking Console - MERN Stack Application",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install --legacy-peer-deps",
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev:server\" \"npm run start:client\"",
+    "dev:lan": "concurrently -n api,web -c blue,green \"npm run dev:server\" \"npm run start:client:lan\"",
+    "dev:server": "cd server && npm run dev",
+    "start:client": "cd client && npm start",
+    "start:client:lan": "cd client && npm run start:lan",
+    "typecheck": "cd server && npm run typecheck && cd ../client && npm run typecheck",
+    "build": "cd server && npm run build && cd ../client && npm run build",
+    "start": "cd server && npm run start",
+    "test": "cd server && npm run test",
+    "db:seed": "cd server && npm run db:seed",
+    "db:migrate": "cd server && npm run db:migrate",
+    "clean": "rimraf server/dist client/build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "banking",
+    "mern",
+    "mongodb",
+    "express",
+    "react",
+    "nodejs",
+    "typescript"
+  ],
+  "author": "Mangaud Banking",
+  "license": "MIT"
+}
