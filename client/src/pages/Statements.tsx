@@ -15,6 +15,7 @@ import { api } from '../services/api';
 import { usePermissions } from '../store/permissionStore';
 import { Account, Statement as StatementDoc, StatementRow } from '../types';
 import { formatCurrency, formatDate, formatDateTime, maskAccountNumber, downloadCSV } from '../utils/format';
+import jsPDF from 'jspdf';
 import { cn } from '../utils/cn';
 import {
   PageHeader,
@@ -149,6 +150,47 @@ export function Statements() {
       toast.error(err?.response?.data?.error || 'Could not open that statement');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const downloadPdf = async () => {
+    if (!statement && rows.length === 0) return;
+    setDownloading(true);
+    try {
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text(`Account statement`, 14, 18);
+      doc.setFontSize(10);
+      const titleAccount = statement?.accountNumber ?? '';
+      const titleNumber = statement?.statementNumber ?? '';
+      doc.text(`Account: ${titleAccount}`, 14, 26);
+      doc.text(`Statement: ${titleNumber}`, 14, 32);
+      let y = 42;
+      doc.setFontSize(8);
+      doc.text('Date', 14, y);
+      doc.text('Description', 40, y);
+      doc.text('Type', 110, y);
+      doc.text('Debit', 130, y);
+      doc.text('Credit', 152, y);
+      doc.text('Balance', 175, y);
+      y += 6;
+      const rowsToWrite = rows.length > 0 ? rows : (statement ? [{ date: statement.fromDate, reference: titleNumber, description: 'Statement available', type: 'SUMMARY', debit: undefined, credit: undefined, balance: statement.closingBalance } as unknown as StatementRow] : []);
+      for (const r of rowsToWrite.slice(0, 38)) {
+        doc.text(formatDate(r.date), 14, y);
+        doc.text((r.description ?? '').slice(0, 28), 40, y);
+        doc.text(String(r.type ?? ''), 110, y);
+        doc.text(r.debit != null ? String(r.debit) : '', 130, y);
+        doc.text(r.credit != null ? String(r.credit) : '', 152, y);
+        doc.text(r.balance != null ? String(r.balance) : '', 175, y);
+        y += 6;
+        if (y > 285) break;
+      }
+      doc.save(`${titleAccount}-${titleNumber}.pdf`);
+      toast.success('PDF downloaded');
+    } catch {
+      toast.error('Could not generate the PDF');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -479,6 +521,15 @@ export function Statements() {
                 isLoading={downloading}
               >
                 Download CSV
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                leftIcon={<Download className="w-3.5 h-3.5" />}
+                onClick={downloadPdf}
+                isLoading={downloading}
+              >
+                Download PDF
               </Button>
             </div>
           </div>
