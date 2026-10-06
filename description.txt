@@ -1,0 +1,273 @@
+# MANGAUD BANKING CONSOLE - COMPREHENSIVE PROJECT DESCRIPTION
+
+## PROJECT NAME
+Mangaud Banking Console
+
+## PROJECT AIM
+To build a comprehensive, full-featured banking console that demonstrates production-ready software engineering patterns, role-based access control, and a complete MERN stack architecture. The console provides a complete banking user experience for six distinct user roles: Customer, Teller, Loan Officer, Branch Manager, Auditor, and Administrator. It serves as both a functional demo product and a reference architecture for building secure fintech applications with React + Express + MongoDB.
+
+## PROJECT SUMMARY
+Mangaud Banking Console is a full-stack MERN (MongoDB, Express.js, React 18, Node.js) web application that delivers a complete banking experience for six distinct user roles: Customer, Teller, Loan Officer, Branch Manager, Auditor, and Administrator. The console demonstrates production-ready patterns including JWT authentication, granular role-based access control (RBAC) with 62 distinct permissions, optimistic UI updates with automatic rollback, a robust audit logging system, scheduled jobs for deposits and standing instructions, and comprehensive test coverage (72 unit/integration tests + 9 E2E tests).
+
+The frontend follows React 18 + TypeScript with Tailwind CSS for styling, Zustand for state management, and Playwright for end-to-end testing. The backend uses Express.js with TypeScript, Mongoose for MongoDB ODM, JWT for authentication, and Zod for input validation. All mutations run through optimistic UI with rollback, and a comprehensive audit log captures every change.
+
+## TECHNOLOGY STACK
+
+### Frontend
+- **React 18** (Create React App) - UI framework with hooks
+- **TypeScript** - Static type safety
+- **Tailwind CSS** - Utility-first styling
+- **Zustand** - State management
+- **React Router v6** - Client-side routing
+- **React Hook Form + Zod** - Form handling and validation
+- **React Hot Toast** - Toast notifications
+- **Lucide Icons** - Icon library
+- **Framer Motion** - Animations and transitions
+- **Playwright** - E2E smoke testing
+
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express.js 4.x** - Web framework
+- **TypeScript** - Static type safety
+- **Mongoose 8.x** - MongoDB ODM
+- **JSON Web Tokens (JWT)** - Authentication tokens
+- **bcryptjs** - Password hashing
+- **Zod** - Input validation schemas
+- **Helmet** - HTTP security headers
+- **CORS** - Cross-origin resource sharing
+- **Express rate-limit** - API rate limiting
+- **Morgan** - HTTP request logging
+- **Compression** - Response compression
+
+### Database
+- **MongoDB 7.0+** - Primary database
+- **Mongoose 8.x** - ODM layer
+
+### Testing & QA
+- **Vitest** - Unit/integration testing framework
+- **Playwright** - E2E browser testing
+- **@types/jest** - Jest type definitions
+
+### Development Tools
+- **Nodemon** - Hot reloading (server dev)
+- **Cross-env** - Environment variable management
+- **ts-node** - TypeScript execution
+- **Concurrently** - Run multiple dev scripts
+- **Rimraf** - Cross-platform file removal
+
+### Build & Deployment
+- **Webpack** (via CRA) - Frontend bundling
+- **TS compiler** - Server TypeScript build
+- **Docker** - Containerization (optional)
+- **PM2** (recommended) - Process manager for production
+
+## ARCHITECTURE
+
+```
+mangaud-banking-console/
+├── client/                     # React 18 + CRA + TypeScript + Tailwind
+│   ├── public/                 # Static assets, manifest, icons
+│   ├── src/
+│   │   ├── components/         # Reusable UI (Button, Card, Modal, Table, Badge, Input, Select, Skeleton, EmptyState, PageHeader, Tabs, Switch)
+│   │   ├── components/layout/  # AuthLayout, MainLayout, Sidebar, Header, Logo, ThemeToggle, AuthScene (3D background)
+│   │   ├── components/ui/      # Button, Input, Card, Badge, Modal, Skeleton, Table, Tabs, etc.
+│   │   ├── components/three/   # Three.js components
+│   │   ├── hooks/             # useAuth, useDebounce, useMediaQuery, useTheme
+│   │   ├── pages/             # All route-level pages (Accounts, Cards, Loans, Deposits, Payments, Beneficiaries, StandingInstructions, Nominees, Statements, Transactions, Notifications, KYC, Profile, Security, Settings, Login, Register, ForgotPassword, ResetPassword, Audit, Customers, OpenAccount, RoleDashboard per role)
+│   │   ├── pages/dashboards/   # Role-specific dashboard components (RoleDashboard, shared)
+│   │   ├── services/           # API client (Axios), tokenStorage, auth helpers
+│   │   ├── store/              # Zustand stores (authStore, accountStore, permissionStore)
+│   │   ├── types/              # Shared TypeScript interfaces
+│   │   ├── utils/              # Formatters, validators, password, cn(), etc.
+│   │   ├── App.tsx             # Main router + RBAC guards
+│   │   └── index.tsx           # Entry point
+│   ├── e2e/                    # Playwright E2E tests (smoke.spec.ts)
+│   ├── playwright.config.ts    # Playwright configuration
+│   └── scripts/                # Utility scripts (check-tokens, preview, pwa-check, shots, etc.)
+│
+├── server/
+│   ├── src/
+│   │   ├── config/             # Env validation, RBAC matrix (permissions.ts)
+│   │   ├── controllers/        # Route handlers (thin, delegate to services)
+│   │   ├── middleware/         # Auth, RBAC, validation, error handling
+│   │   ├── models/             # Mongoose schemas (User, Account, Loan, Card, Deposit, Payment, Beneficiary, StandingInstruction, Nominee, Notification, AuditLog, Statement, Transaction, KycSubmission, FixedDeposit)
+│   │   ├── routes/             # Express routers per resource
+│   │   ├── services/           # Business logic (account, loan, card, payment, deposit, kyc, notification, audit, auth)
+│   │   ├── validators/         # Zod schemas for all endpoints
+│   │   ├── utils/              # logger, database, ownership, reference, validation, crypto
+│   │   ├── index.ts            # App entry, static hosting in prod
+│   │   └── jobs/               # Scheduler (deposit maturity, standing instructions)
+│   ├── src/tests/              # Vitest unit/integration tests (72 tests total)
+│   └── scripts/                # migrate, seed
+│
+├── .github/workflows/          # CI/CD GitHub Actions
+├── .gitignore
+├── LICENSE
+└── README.md
+```
+
+## KEY FEATURES
+
+### Authentication & Authorization
+- JWT-based authentication (access token 15min, refresh token 7 days)
+- httpOnly cookie fallback for refresh token
+- Role-based access control with 6 roles and 62 fine-grained permissions
+- Branch-scoped access for teller/manager roles (SOL-id style)
+- Ownership checks on all resources (own/any pattern)
+
+### Banking Features
+- **Accounts**: Open, close, deposit, withdraw, transfer, interest calculation
+- **Cards**: Issue, freeze/unfreeze, cancel, limits, PIN set, nickname, reveal CVV
+- **Loans**: Apply, repay (from any own account), calculate interest, staff queue (manager/loan officer approve, disburse via admin)
+- **Deposits (FD)**: Open, close, premature closure with penalty, auto-maturity scheduler
+- **Payments**: Internal transfer, IMPS/NEFT/RTGS, beneficiary management
+- **Standing Instructions**: Create, pause, resume, run now, cancel, monthly load summary
+- **Statements**: Generate PDF statements per account
+- **Transactions**: Full transaction history with filtering, pagination, search
+- **Notifications**: Real-time list, mark read/all, clear read, delete, unread badge count
+- **Beneficiaries**: CRUD, favourite toggle, search, optimistic updates
+- **Standing Instructions**: Create, pause, resume, run now, cancel, monthly load summary
+- **KYC**: Submit documents, staff review queue, approval workflow
+- **Audit Log**: Immutable trail of every mutation, branch-scoped for staff
+- **Admin**: User management, branch structure, system config
+
+### UI/UX
+- Optimistic UI with automatic rollback on all mutations
+- Role-specific dashboards (6 distinct dashboard views)
+- Responsive design (mobile + desktop)
+- Dark mode support
+- Skeleton loading states
+- Toast notifications for all actions
+- Empty states for all data-empty scenarios
+- Form validation with Zod (client + server)
+
+## TESTING
+
+### Server (Jest/Vitest)
+- **Unit tests**: 72 tests across 4 files (auth, payment, loan, deposit services)
+- **RBAC audit**: Structural audit of 102 routes × 62 permissions × 6 roles
+- **Integration tests**: Role boundary testing over HTTP (role-boundaries.test.ts)
+- **Money integrity tests**: Concurrent transaction safety tests (money-integrity.test.ts)
+
+### E2E (Playwright)
+- 9 smoke tests covering: hub page, login page, all 6 role logins, demo login buttons, and routing
+
+### How to run
+```bash
+# Server tests
+cd server && npm test
+
+# Client typecheck
+cd client && npm run typecheck
+
+# E2E tests
+cd client && npx playwright test
+```
+
+## DEPLOYMENT
+
+### Development
+```bash
+# Windows
+./start.bat           # starts API + client
+
+# Unix
+npm run dev
+```
+
+### Production
+```bash
+npm run build
+NODE_ENV=production npm start   # API serves static client build
+```
+
+### Environment Variables (Production)
+```env
+NODE_ENV=production
+PORT=5000
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/mangaud
+JWT_ACCESS_SECRET=<32+ char random string>
+JWT_REFRESH_SECRET=<32+ char random string>
+CLIENT_URL=https://app.yourdomain.com
+TRUST_PROXY_HOOPS=1
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=6000
+RATE_LIMIT_MAX_AUTH_REQUESTS=50
+LOG_LEVEL=warn
+BCRYPT_ROUNDS=12
+```
+
+## SECURITY
+
+- **Helmet**: Security headers (CSP, HSTS, X-Frame-Options, etc.)
+- **CORS**: Strict origin allowlist
+- **Rate limiting**: 6000 requests/15min general, 50 requests/15min auth endpoints
+- **JWT**: Short-lived access (15min), longer refresh (7 days), httpOnly cookies
+- **bcrypt**: Password hashing with 12 rounds
+- **Audit**: Every mutation logged with actor, action, entity, metadata
+- **Branch scoping**: Staff can only access their branch
+- **Validation**: Zod schemas on every mutation endpoint
+- **SQL injection prevention**: Mongoose ODM (parameterized queries)
+- **XSS protection**: React escapes by default, Content-Security-Policy
+
+## KNOWN LIMITATIONS (DELIBERATE)
+
+- No 2FA/OTP on login or money moves
+- No maker-checker on payments/deposits/withdrawals (only loan approve/disburse split)
+- No real KYC document verification (text input only)
+- No email/SMS/push notification channel
+- Statements are JSON/text, not PDF
+- No password reset flow
+- No account lockout after failed logins
+- No session management UI
+- React Router v6 has a moderate open-redirect advisory (fix requires v7 major bump)
+
+## ROADMAP (10/10)
+
+### Phase 1: Trust primitives
+- [ ] MFA/OTP on login
+- [ ] Refresh token rotation + session management
+- [ ] Password reset + lockout
+- [ ] Session revocation UI
+
+### Phase 2: Maker-checker
+- [ ] Pending state on transfers/deposits/withdrawals
+- [ ] Second-role approval workflow
+- [ ] Daily limits per role
+
+### Phase 3: PII scoping
+- [ ] Branch-scoped staff `:any` reads everywhere
+- [ ] Customer cannot see staff dashboards
+
+### Phase 4: CI/CD
+- [ ] GitHub Actions: typecheck → test → build
+- [ ] Manual E2E gate before deploy
+
+### Phase 5: Production
+- [ ] Refresh token rotation UI
+- [ ] Audit log streaming to external WORM store
+- [ ] Real KYC document upload + verification
+- [ ] Email/SMS/push notifications
+- [ ] PDF statement generation
+
+## CONTRIBUTING
+
+1. Fork → branch → PR
+2. `npm run typecheck && npm test` must pass
+3. Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `test:`
+
+## LICENSE
+
+MIT License - see [LICENSE](LICENSE)
+
+## ACKNOWLEDGMENTS
+
+- Built with: React, Express, MongoDB, Mongoose, Tailwind CSS, Zustand, React Hook Form, Zod, Vitest, Playwright
+- Inspired by: N26, Monzo, Chime, and other modern fintech apps
+- Security patterns: OWASP Top 10, NIST, PCI-DSS considerations
+
+---
+
+**Repository**: https://github.com/mangalam-gaud/mangaud-banking-console.git
+**Live Demo**: (configure your own deployment)
+**Last Updated**: October 2026
