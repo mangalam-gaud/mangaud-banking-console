@@ -113,9 +113,29 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
     throw new UnauthorizedError('Account is deactivated');
   }
 
+  // Brute-force guard: repeated failures pin the account to a temporary lockout
+  // so the same credential-guessing endpoint cannot be used to enumerate
+  // passwords. A successful login clears the counter and the lock.
+  if (user.lockUntil && user.lockUntil > new Date()) {
+    const mins = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
+    throw new UnauthorizedError(`Account locked for ${mins} more minute(s). Try again later.`);
+  }
+
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
+    user.loginAttempts = (user.loginAttempts ?? 0) + 1;
+    if (user.loginAttempts >= 5) {
+      user.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+      user.loginAttempts = 0;
+    }
+    await user.save();
     throw new UnauthorizedError('Invalid email or password');
+  }
+
+  if (user.loginAttempts || user.lockUntil) {
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+    await user.save();
   }
 
   const tokens = await createTokens(user);

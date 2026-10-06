@@ -10,12 +10,7 @@ import './index.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <BrowserRouter
-        // Opt in to the v6 -> v7 behaviours now. Without these, React Router
-        // logs two deprecation warnings on every page load, which drowns out
-        // real console errors in development.
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <BrowserRouter>
         <AuthProvider>
           <App />
           <Toaster

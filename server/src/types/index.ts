@@ -235,6 +235,8 @@ export interface IUserFields {
   isActive: boolean;
   isEmailVerified: boolean;
   lastLoginAt?: Date;
+  loginAttempts?: number;
+  lockUntil?: Date | null;
   fullName: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
   // Added by the schema's `timestamps: true` option.

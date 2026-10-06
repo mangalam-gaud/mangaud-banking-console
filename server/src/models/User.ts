@@ -74,6 +74,18 @@ const userSchema = new Schema<IUserDocument>(
     lastLoginAt: {
       type: Date,
     },
+    // Tracks failed password attempts within the current window; resets on a
+    // successful login. Once it crosses MAX_FAILED_LOGINS the account is locked
+    // for LOCK_MINUTES via lockUntil, so a single endpoint call cannot be
+    // brute-forced even if the client toggles remember-me.
+    loginAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lockUntil: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
