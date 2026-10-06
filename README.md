@@ -227,6 +227,25 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
+## 🏛️ References
+
+Implementation is a MERN stack with our own code; these are the libraries and sources actually used:
+
+- [React](https://react.dev/) + [Create React App](https://create-react-app.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Zustand](https://zustand-demo.pmnd.rs/)
+- [React Router](https://reactrouter.com/)
+- [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- [Express](https://expressjs.com/) + [helmet](https://helmetjs.github.io/)
+- [Mongoose](https://mongoosejs.com/) over MongoDB
+- [JSON Web Tokens](https://jwt.io/)
+- [Vitest](https://vitest.dev/) + [Playwright](https://playwright.dev/)
+- [Lucide React](https://lucide.dev/) icons, [react-hot-toast](https://react-hot-toast.com/)
+- Security posture informed by the [OWASP Top 10](https://owasp.org/Top10/)
+- UX patterns informed curiously by retail-banking apps (N26, Monzo, Chime) — patterns only, no code
+
+---
+
 ## 🤝 Contributing
 
 1. Fork → branch → PR
